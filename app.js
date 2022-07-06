@@ -1,6 +1,7 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.117.1/build/three.module.js";
 
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.117.1/examples/jsm/controls/OrbitControls.js";
+
 // import { nipplejs } from "./nipplejs.min.js";
 
 // import nipplejs from "https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.1/nipplejs.min.js";
@@ -23,19 +24,21 @@ var width = window.innerWidth,
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 document.body.appendChild(renderer.domElement);
+
 // Create the scene
 var scene = new THREE.Scene();
+
 // Create a camera
 var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
-camera.position.z = 50;
-camera.position.y = 50;
+camera.position.z = 0.1;
+camera.position.y = 0.1;
 
 scene.add(camera);
 
 // Create a light, set its position, and add it to the scene.
-var light = new THREE.PointLight(0xffffff);
-light.position.set(-100, 200, 100);
-scene.add(light);
+// var light = new THREE.PointLight(0xffffff);
+// light.position.set(-100, 200, 100);
+// scene.add(light);
 
 // Add OrbitControls so that we can pan around with the mouse.
 var controls = new OrbitControls(camera, renderer.domElement);
@@ -60,12 +63,12 @@ scene.add(axes);
 
 // Add grid
 const size = 500;
-const divisions = 30;
+const divisions = 50;
 
 const gridHelper = new THREE.GridHelper(size, divisions);
 scene.add(gridHelper);
 
-var geometry = new THREE.SphereGeometry(5);
+var geometry = new THREE.SphereGeometry(5, 32, 32);
 var cubeMaterial = new THREE.MeshNormalMaterial();
 
 var mesh = new THREE.Mesh(geometry, cubeMaterial);
@@ -73,13 +76,13 @@ scene.add(mesh);
 
 //var ground = new Object3D()
 let size_floor = 100;
-var geometry_floor = new THREE.BoxGeometry(size_floor, 1, size_floor);
+var geometry_floor = new THREE.BoxGeometry(size_floor, 0.25, size_floor);
 var material_floor = new THREE.MeshNormalMaterial();
 
 var floor = new THREE.Mesh(geometry_floor, material_floor);
 floor.position.y = -5;
-floor.visible = false;
-//ground.add(floor)
+floor.visible = true;
+// ground.add(floor);
 scene.add(floor);
 //floor.rotation.x = -Math.PI / 2
 
@@ -111,10 +114,11 @@ function animate() {
 function updatePlayer() {
   // move the player
   const angle = controls.getAzimuthalAngle();
+  console.log(`the current azimuth angle is ${angle}`);
 
   if (fwdValue > 0) {
     tempVector.set(0, 0, -fwdValue).applyAxisAngle(upVector, angle);
-    mesh.position.addScaledVector(tempVector, 1);
+    mesh.position.addScaledVector(tempVector, 2);
   }
 
   if (bkdValue > 0) {
@@ -134,11 +138,12 @@ function updatePlayer() {
 
   mesh.updateMatrixWorld();
 
-  //controls.target.set( mesh.position.x, mesh.position.y, mesh.position.z );
+  // controls.target.set(mesh.position.x, mesh.position.y, mesh.position.z);
   // reposition camera
   camera.position.sub(controls.target);
   controls.target.copy(mesh.position);
-  camera.position.add(mesh.position);
+  // console.log(mesh.position);
+  camera.position.add(mesh.position.sub(new THREE.Vector3(0, 0, 0)));
 }
 
 function addJoystick() {
